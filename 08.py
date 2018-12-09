@@ -12,13 +12,19 @@ def make_node():
 
 
 def build_tree(data):
-    global meta_total
+    """
+    Builds a tree from the given deque. Values are popped off of the deque as the tree is built.
+    """
+    global meta_total  # Keep a running total of the meta data values
     n = make_node()
+    # The first and second values in data are the number of children for this node and the number of meta data entires respectively.
     child_count = data.popleft()
     meta_count = data.popleft()
     for _ in range(child_count):
+        # Recursively build subtrees for each child
         n['children'].append(build_tree(data))
     for _ in range(meta_count):
+        # Pop the meta data values off of the deque and update the total
         m = data.popleft()
         meta_total += m
         n['meta_data'].append(m)
@@ -26,11 +32,17 @@ def build_tree(data):
 
 
 def node_value(node):
+    """
+    Determine the value of the given node.
+     - For nodes without children, the value is the sum of meta_data.
+     - For nodes with children, the value is the sum of the values calculated for the children referenced in meta_data.
+       Values in meta_data that are out of range are ignored.
+    """
     if len(node['children']) == 0:
         return sum(node['meta_data'])
-
+    # Find children referenced in meta_data
     children = [node['children'][i - 1] for i in node['meta_data'] if 0 < i <= len(node['children'])]
-
+    # Recurse over children and return the sum of their values
     return sum(map(node_value, children))
 
 
